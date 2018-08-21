@@ -20,6 +20,7 @@
 #define FRAME    "J2000"
 #define ABCORR   "LT+S"
 #define AU       150000000
+#define SCALE    4
 
 void draw(SpiceInt* x, SpiceInt* y) {
   int y_ax, x_ax;
@@ -46,10 +47,12 @@ void earth_pos ( SpiceDouble* et, SpiceDouble epos[] ) {
 
 SpiceDouble math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
   SpiceDouble result = sqrt((pow(p[0],2) + pow(p[1],2) +  pow(p[2],2)));
-  *xpos = p[0] / AU * 4;
-  *ypos = p[1] / AU * 4;
+  *xpos = p[0] / AU * SCALE;
+  *ypos = p[1] / AU * SCALE;
   return result;
 }
+
+void get_dists (){} 
 
 // Get time (UTC)
 void get_time ( char* mytime ) {
@@ -71,15 +74,16 @@ int main ( int argc, char** argv ){
   get_time(frmt_time);
   printf("Time (UTC): %s\n", frmt_time);
   printf("Loading Kernels...\n");
+  // Load the necessary kernels
   furnsh_c( "metakernel.tm" );
   str2et_c(frmt_time, &et);
   earth_pos(&et, pos); 
-  dist = math(pos, &xpos, &ypos);
-  printf("SUN -> EAR (AU): %f\n", dist / AU); 
+  // get integer x & y pos 
+  dist = math(pos, &xpos, &ypos); 
   printf("SUN -> EAR (AU) (X, Y) Coord: (%f, %f)\n", pos[0] / AU, pos[1] / AU);
   // Testing out integer forms if each space char is .3 AU
   printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", \
-        (SpiceInt)(pos[0] / AU * 4), (SpiceInt)(pos[1] / AU * 4));
+        (SpiceInt)(pos[0] / AU * SCALE), (SpiceInt)(pos[1] / AU * SCALE));
   draw(&xpos, &ypos);
   
   return 0;
