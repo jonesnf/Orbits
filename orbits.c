@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <time.h>
-#include "SpiceUsr.h"
+#include <string.h>
+//#include "SpiceUsr.h"
+#include "planets.h"
 
 #define SUN 0
 #define MER 1
@@ -21,7 +23,6 @@
 #define ABCORR   "LT+S"
 #define AU       150000000
 #define SCALE    4
-
 void draw(SpiceInt* x, SpiceInt* y) {
   int y_ax, x_ax;
   for (  y_ax= 0;  y_ax< 24; y_ax++ ) {
@@ -54,6 +55,12 @@ SpiceDouble math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
 
 void get_dists (){} 
 
+void fill_plnts (struct Planets plnts[]) {
+   for ( int i = 0; i < 10; i++ ) {
+       strcpy(plnts[i].name, plnt_names[i]);
+   } 
+}
+
 // Get time (UTC)
 void get_time ( char* mytime ) {
   time_t timet;
@@ -66,20 +73,23 @@ void get_time ( char* mytime ) {
 } 
 
 int main ( int argc, char** argv ){
-  SpiceChar ttt[WORDZ]; 
   SpiceDouble et, dist; // ephemiris-based time
   SpiceDouble pos[3];
+  // Need these for the time being
   SpiceInt xpos, ypos;
   char frmt_time[30];
+  struct Planets p[9];
+  fill_plnts(p);
+
   get_time(frmt_time);
   printf("Time (UTC): %s\n", frmt_time);
   printf("Loading Kernels...\n");
   // Load the necessary kernels
   furnsh_c( "metakernel.tm" );
   str2et_c(frmt_time, &et);
-  earth_pos(&et, pos); 
+  earth_pos(&et, p[3].pos); 
   // get integer x & y pos 
-  dist = math(pos, &xpos, &ypos); 
+  dist = math(p[3].pos, &xpos, &ypos); 
   printf("SUN -> EAR (AU) (X, Y) Coord: (%f, %f)\n", pos[0] / AU, pos[1] / AU);
   // Testing out integer forms if each space char is .3 AU
   printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", \
