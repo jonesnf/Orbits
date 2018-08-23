@@ -89,12 +89,12 @@ int main ( int argc, char** argv ){
   str2et_c(frmt_time, &et);
   earth_pos(&et, p[3].pos); 
   // get integer x & y pos 
-  dist = math(p[3].pos, &xpos, &ypos); 
-  printf("SUN -> EAR (AU) (X, Y) Coord: (%f, %f)\n", pos[0] / AU, pos[1] / AU);
+  dist = math(p[3].pos, &p[3].xpos, &p[3].ypos ); 
+  printf("SUN -> EAR (AU) (X, Y) Coord: (%f, %f)\n", p[3].pos[0] / AU,\
+          p[3].pos[1] / AU);
   // Testing out integer forms if each space char is .3 AU
-  printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", \
-        (SpiceInt)(pos[0] / AU * SCALE), (SpiceInt)(pos[1] / AU * SCALE));
-  draw(&xpos, &ypos);
+  printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", p[3].xpos, p[3].ypos);
+  draw(&p[3].xpos, &p[3].ypos);
   
   return 0;
 }
