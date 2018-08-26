@@ -14,7 +14,7 @@
 #define SAT 6
 #define URA 7
 #define NEP 8
-#define PLU 9  // I'll still plot you little buddy even though you're not planet :)  
+#define PLU 9  // I'll still plot you little buddy even though you're not a planet :)  
 
 char* plnt_names[10] = {"SUN", "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER",\
                         "SATURN", "URANUS", "NEPTUNE", "pluto"};
