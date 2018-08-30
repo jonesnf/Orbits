@@ -5,38 +5,33 @@
 //#include "SpiceUsr.h"
 #include "planets.h"
 
-#define SUN 0
-#define MER 1
-#define VEN 2
-#define EAR 3
-#define MAR 4
-#define JUP 5
-#define SAT 6
-#define URA 7
-#define NEP 8
-#define PLU 9  // I still consider you a planet little buddy! 
-
 #define WORDZ    41
 #define TARGET   "sun"
 #define OBSERVER "sun"
 #define FRAME    "J2000"
 #define ABCORR   "LT+S"
 #define AU       150000000
-#define SCALE    4
+#define SCALE    10 
 
-void draw(SpiceInt* x, SpiceInt* y) {
-  int y_ax, x_ax;
-  for (  y_ax= 0;  y_ax< 24; y_ax++ ) {
-    for ( x_ax = 0; x_ax < 50; x_ax++ ) {
-      if ( x_ax == 25 && y_ax == 12 ) {
-        printf("S");
-      } else if ( x_ax == (*x * (-1) +25) && y_ax == (*y+12) ) {
-        printf(" E");
-      } else {
-        printf(" "); 
-      } 
-    } printf("\n");
-  }
+// unfortunately, resorted to global matrix (for now)
+char map[25][50];
+
+void draw ( struct Planets plnts[] ) {
+    for ( int row = 0; row < 25; row++) {
+        for ( int col = 0; col < 50; col++) {
+            map[row][col] = ' ';
+        }
+    }  
+    map[plnts[1].ypos + 12][(plnts[1].xpos * -1) + 25] = 'M';
+    map[plnts[2].ypos + 12][(plnts[2].xpos * -1) + 25] = 'V';
+    map[plnts[3].ypos + 12][(plnts[3].xpos * -1) + 25] = 'E';
+    map[12][25] = 'S';
+    for ( int row = 0; row < 25; row++) {
+        for ( int col = 0; col < 50; col++) {
+            printf("%c", map[row][col]);
+        }
+        printf("\n");
+    }  
 }
 
 
@@ -44,7 +39,7 @@ void draw(SpiceInt* x, SpiceInt* y) {
 //       which will be used to gather position data of all planets
 void planet_pos ( const SpiceDouble* et, struct Planets* plnt ) {
   SpiceDouble ltsec;
-  spkpos_c( plnt->name, *et, FRAME, ABCORR, OBSERVER, plnt->pos, &ltsec); 
+  spkpos_c( TARGET, *et, FRAME, ABCORR, plnt->name, plnt->pos, &ltsec); 
   printf("%s: %f, %f\n", plnt->name, plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);
 }
 
@@ -55,16 +50,13 @@ void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
 
 
 void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
-   // First, fill names of planets 
-   for ( int i = SUN; i < PLU+1; i++ ) {
+   // Fill names of planets, positions, and convert to ints
+   // Only have data for sun, mer, venus, earth
+   for ( int i = SUN; i < MAR; i++ ) {
        strcpy(plnts[i].name, plnt_names[i]);
        planet_pos(et, &plnts[i]);
        math(plnts[i].pos, &plnts[i].xpos, &plnts[i].ypos); 
    } 
-   // Fill in position data
-   // planet_pos(et, plnts[3].pos);
-   // math(plnts[3].pos, &plnts[3].xpos, &plnts[3].ypos); 
-   // printf("%f, %f\n", plnts[3].pos[0], plnts[3].pos[1]); 
 }
 
 // Get time (UTC)
@@ -80,7 +72,6 @@ void get_time ( char* mytime ) {
 
 int main ( int argc, char** argv ){
   SpiceDouble et, dist; // ephemiris-based time
-  SpiceDouble pos[3];
   char frmt_time[30];
   struct Planets p[9];
   // Get the current time in specific format (UTC)
@@ -91,11 +82,8 @@ int main ( int argc, char** argv ){
   furnsh_c( "metakernel.tm" );
   str2et_c(frmt_time, &et);
   fill_plnts(p, &et);
-  // get integer x & y pos 
-  printf("SUN -> EAR (AU) (X, Y) Coord: (%f, %f)\n", p[3].pos[0] / AU,\
-          p[3].pos[1] / AU);
-  // Testing out integer forms if each space char is .3 AU
+  // Testing out integer forms if each space char is 1 AU
   printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", p[3].xpos, p[3].ypos);
-  draw(&p[3].xpos, &p[3].ypos);
+  draw(p);
   return 0;
 }
