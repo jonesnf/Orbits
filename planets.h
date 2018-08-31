@@ -16,8 +16,8 @@
 #define NEP 8
 #define PLU 9  // I'll still plot you little buddy even though you're not a planet :)  
 
-char* plnt_names[10] = {"SUN", "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER",\
-                        "SATURN", "URANUS", "NEPTUNE", "pluto"};
+char* plnt_names[10] = {"SUN", "MERCURY", "VENUS", "EARTH", "4", "5",\
+                        "6", "7", "8", "9"};
 char plnt_sym[10] = {'S', 'M', 'V', 'E', 'R', 'J', 'S', 'U', 'N', 'p'};
 
 struct Planets {

@@ -10,25 +10,28 @@
 #define FRAME    "J2000"
 #define ABCORR   "LT+S"
 #define AU       150000000
-#define SCALE    10 
+#define SCALE    3 
+#define YAXIS    175 
+#define XAXIS    200 
 
 // unfortunately, resorted to global matrix (for now)
-char map[25][50];
+char map[YAXIS][XAXIS];
 
 void draw ( struct Planets plnts[] ) {
     // First, draw map / coordinate plane / graph
-    for ( int row = 0; row < 25; row++) {
-        for ( int col = 0; col < 50; col++) {
+    for ( int row = 0; row < YAXIS; row++) {
+        for ( int col = 0; col < XAXIS; col++) {
             map[row][col] = ' ';
         }
     }  
+    int cntrX = XAXIS / 2; int cntrY = YAXIS / 2;
     // Assign plnt symbol on specific coordinates
-    for ( int i = 0; i < 4; i++) {
-        map[plnts[i].ypos + 12][(plnts[i].xpos * -1) + 25] = plnts[i].sym;
+    for ( int i = SUN; i < PLU+1; i++) {
+        map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
     }  
     // Plot
-    for ( int row = 0; row < 25; row++) {
-        for ( int col = 0; col < 50; col++) {
+    for ( int row = 0; row < YAXIS; row++) {
+        for ( int col = 0; col < XAXIS; col++) {
             printf("%c", map[row][col]);
         }
         printf("\n");
@@ -54,7 +57,7 @@ void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
 void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
    // Fill syms/names of planets, positions, and convert to ints
    // Only have data for sun, mer, venus, earth
-   for ( int i = SUN; i < MAR; i++ ) {
+   for ( int i = SUN; i < PLU + 1; i++ ) {
        plnts[i].sym = plnt_sym[i];
        strcpy(plnts[i].name, plnt_names[i]);
        planet_pos(et, &plnts[i]);
@@ -77,7 +80,7 @@ int main ( int argc, char** argv ){
   // ephemiris-based time
   SpiceDouble et, dist; 
   char frmt_time[30];
-  struct Planets p[9];
+  struct Planets p[10];
   // Get the current time in specific format (UTC)
   get_time(frmt_time);
   printf("Time (UTC): %s\n", frmt_time);
