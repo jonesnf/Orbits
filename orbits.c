@@ -2,7 +2,6 @@
 #include <math.h>
 #include <time.h>
 #include <string.h>
-//#include "SpiceUsr.h"
 #include "planets.h"
 
 #define WORDZ    41
@@ -17,15 +16,17 @@
 char map[25][50];
 
 void draw ( struct Planets plnts[] ) {
+    // First, draw map / coordinate plane / graph
     for ( int row = 0; row < 25; row++) {
         for ( int col = 0; col < 50; col++) {
             map[row][col] = ' ';
         }
     }  
-    map[plnts[1].ypos + 12][(plnts[1].xpos * -1) + 25] = 'M';
-    map[plnts[2].ypos + 12][(plnts[2].xpos * -1) + 25] = 'V';
-    map[plnts[3].ypos + 12][(plnts[3].xpos * -1) + 25] = 'E';
-    map[12][25] = 'S';
+    // Assign plnt symbol on specific coordinates
+    for ( int i = 0; i < 4; i++) {
+        map[plnts[i].ypos + 12][(plnts[i].xpos * -1) + 25] = plnts[i].sym;
+    }  
+    // Plot
     for ( int row = 0; row < 25; row++) {
         for ( int col = 0; col < 50; col++) {
             printf("%c", map[row][col]);
@@ -43,6 +44,7 @@ void planet_pos ( const SpiceDouble* et, struct Planets* plnt ) {
   printf("%s: %f, %f\n", plnt->name, plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);
 }
 
+// Essentially converting coords in AU to coords in char spaces
 void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
   *xpos = p[0] / AU * SCALE;
   *ypos = p[1] / AU * SCALE;
@@ -50,9 +52,10 @@ void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
 
 
 void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
-   // Fill names of planets, positions, and convert to ints
+   // Fill syms/names of planets, positions, and convert to ints
    // Only have data for sun, mer, venus, earth
    for ( int i = SUN; i < MAR; i++ ) {
+       plnts[i].sym = plnt_sym[i];
        strcpy(plnts[i].name, plnt_names[i]);
        planet_pos(et, &plnts[i]);
        math(plnts[i].pos, &plnts[i].xpos, &plnts[i].ypos); 
@@ -71,7 +74,8 @@ void get_time ( char* mytime ) {
 } 
 
 int main ( int argc, char** argv ){
-  SpiceDouble et, dist; // ephemiris-based time
+  // ephemiris-based time
+  SpiceDouble et, dist; 
   char frmt_time[30];
   struct Planets p[9];
   // Get the current time in specific format (UTC)

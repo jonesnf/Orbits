@@ -18,9 +18,11 @@
 
 char* plnt_names[10] = {"SUN", "MERCURY", "VENUS", "EARTH", "MARS", "JUPITER",\
                         "SATURN", "URANUS", "NEPTUNE", "pluto"};
+char plnt_sym[10] = {'S', 'M', 'V', 'E', 'R', 'J', 'S', 'U', 'N', 'p'};
 
 struct Planets {
     char        name[10];
+    char        sym;
     SpiceDouble pos[3];
     SpiceInt    xpos;
     SpiceInt    ypos;
