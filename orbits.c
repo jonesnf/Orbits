@@ -10,9 +10,12 @@
 #define FRAME    "J2000"
 #define ABCORR   "LT+S"
 #define AU       150000000
-#define SCALE    3 
-#define YAXIS    175 
-#define XAXIS    200 
+#define SCALE    6 
+#define YAXIS    50 
+#define XAXIS    70 
+#define FIT      4 
+#define L2FIT    6 
+#define L3FIT    11 
 
 // unfortunately, resorted to global matrix (for now)
 char map[YAXIS][XAXIS];
@@ -27,7 +30,18 @@ void draw ( struct Planets plnts[] ) {
     int cntrX = XAXIS / 2; int cntrY = YAXIS / 2;
     // Assign plnt symbol on specific coordinates
     for ( int i = SUN; i < PLU+1; i++) {
-        map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
+        if ( i < 5 ) {
+          map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
+        } else if ( i < 6 ) {
+        
+          map[plnts[i].ypos/FIT + cntrY][(plnts[i].xpos * -1)/FIT + cntrX] = plnts[i].sym;
+        } else if ( i < 9 ) {
+          map[plnts[i].ypos/L2FIT + cntrY][(plnts[i].xpos * -1)/L2FIT + cntrX]\
+              = plnts[i].sym;
+        } else {
+          map[plnts[i].ypos/L3FIT + cntrY][(plnts[i].xpos * -1)\
+              /L3FIT + cntrX] = plnts[i].sym;
+        }
     }  
     // Plot
     for ( int row = 0; row < YAXIS; row++) {
