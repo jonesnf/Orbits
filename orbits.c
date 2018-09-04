@@ -29,6 +29,7 @@ void draw ( struct Planets plnts[] ) {
     }  
     int cntrX = XAXIS / 2; int cntrY = YAXIS / 2;
     // Assign plnt symbol on specific coordinates
+    /*
     for ( int i = SUN; i < PLU+1; i++) {
         if ( i < 5 ) {
           map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
@@ -43,6 +44,10 @@ void draw ( struct Planets plnts[] ) {
               /L3FIT + cntrX] = plnts[i].sym;
         }
     }  
+    */
+    for ( int i = SUN; i < PLU + 1; i++ ) {
+        map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
+    }
     // Plot
     for ( int row = 0; row < YAXIS; row++) {
         for ( int col = 0; col < XAXIS; col++) {
@@ -58,13 +63,20 @@ void draw ( struct Planets plnts[] ) {
 void planet_pos ( const SpiceDouble* et, struct Planets* plnt ) {
   SpiceDouble ltsec;
   spkpos_c( TARGET, *et, FRAME, ABCORR, plnt->name, plnt->pos, &ltsec); 
-  printf("%s: %f, %f\n", plnt->name, plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);
+  // For DEBUG only
+  // printf("%s: %f, %f\n", plnt->name,\
+          plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);
 }
 
 // Essentially converting coords in AU to coords in char spaces
-void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos ) {
-  *xpos = p[0] / AU * SCALE;
-  *ypos = p[1] / AU * SCALE;
+void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos, const int *plnt ) {
+  if ( *plnt < 4 ) {
+      *xpos = p[0] / AU * SCALE;
+      *ypos = p[1] / AU * SCALE;
+  } else {
+      *xpos = (log10(fabs(p[0]) / AU) + 1) * SCALE;
+      *ypos = (log10(fabs(p[1]) / AU) + 1) * SCALE;
+  }
 }
 
 
@@ -75,7 +87,7 @@ void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
        plnts[i].sym = plnt_sym[i];
        strcpy(plnts[i].name, plnt_names[i]);
        planet_pos(et, &plnts[i]);
-       math(plnts[i].pos, &plnts[i].xpos, &plnts[i].ypos); 
+       math(plnts[i].pos, &plnts[i].xpos, &plnts[i].ypos, &i); 
    } 
 }
 
