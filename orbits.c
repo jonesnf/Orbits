@@ -3,7 +3,8 @@
 #include <time.h>
 #include <string.h>
 #include "planets.h"
-
+//                                                  _      _
+//Probably can put these in planets.h but oh well    \(00)/
 #define WORDZ    41
 #define TARGET   "sun"
 #define OBSERVER "sun"
@@ -12,10 +13,7 @@
 #define AU       150000000
 #define SCALE    6 
 #define YAXIS    50 
-#define XAXIS    70 
-#define FIT      4 
-#define L2FIT    6 
-#define L3FIT    11 
+#define XAXIS    90 
 
 // unfortunately, resorted to global matrix (for now)
 char map[YAXIS][XAXIS];
@@ -28,27 +26,10 @@ void draw ( struct Planets plnts[] ) {
         }
     }  
     int cntrX = XAXIS / 2; int cntrY = YAXIS / 2;
-    // Assign plnt symbol on specific coordinates
-    /*
-    for ( int i = SUN; i < PLU+1; i++) {
-        if ( i < 5 ) {
-          map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
-        } else if ( i < 6 ) {
-        
-          map[plnts[i].ypos/FIT + cntrY][(plnts[i].xpos * -1)/FIT + cntrX] = plnts[i].sym;
-        } else if ( i < 9 ) {
-          map[plnts[i].ypos/L2FIT + cntrY][(plnts[i].xpos * -1)/L2FIT + cntrX]\
-              = plnts[i].sym;
-        } else {
-          map[plnts[i].ypos/L3FIT + cntrY][(plnts[i].xpos * -1)\
-              /L3FIT + cntrX] = plnts[i].sym;
-        }
-    }  
-    */
     for ( int i = SUN; i < PLU + 1; i++ ) {
         map[plnts[i].ypos + cntrY][(plnts[i].xpos * -1) + cntrX] = plnts[i].sym;
     }
-    // Plot
+    // Plot newly added planets
     for ( int row = 0; row < YAXIS; row++) {
         for ( int col = 0; col < XAXIS; col++) {
             printf("%c", map[row][col]);
@@ -57,32 +38,37 @@ void draw ( struct Planets plnts[] ) {
     }  
 }
 
-
-// TODO: make this into general get_position function
-//       which will be used to gather position data of all planets
 void planet_pos ( const SpiceDouble* et, struct Planets* plnt ) {
   SpiceDouble ltsec;
   spkpos_c( TARGET, *et, FRAME, ABCORR, plnt->name, plnt->pos, &ltsec); 
   // For DEBUG only
-  // printf("%s: %f, %f\n", plnt->name,\
-          plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);
+  /*printf("%s: %f, %f\n", plnt->name,\
+          plnt->pos[0] / AU * SCALE, plnt->pos[1] / AU * SCALE);*/
 }
 
-// Essentially converting coords in AU to coords in char spaces
+/* Scale linearly for Sun - Earth; Mars - pluto scale logrithmically, but remember
+ *   their if their X (or Y) coordinate was negative.  This let's us take the log 
+ *   w/o getting a decimal.
+ * */
 void math ( SpiceDouble p[], SpiceInt* xpos, SpiceInt* ypos, const int *plnt ) {
   if ( *plnt < 4 ) {
       *xpos = p[0] / AU * SCALE;
       *ypos = p[1] / AU * SCALE;
   } else {
-      *xpos = (log10(fabs(p[0]) / AU) + 1) * SCALE;
-      *ypos = (log10(fabs(p[1]) / AU) + 1) * SCALE;
+      if ( p[0] > 0 ) 
+        *xpos = (log10(fabs(p[0])) / AU + 1) * SCALE;
+      else
+        *xpos = (log10(fabs(p[0]) / AU) + 1) * SCALE * -1;
+
+      if ( p[1] > 0 ) 
+        *ypos = (log10(fabs(p[1]) / AU) + 1) * SCALE;
+      else
+        *ypos = (log10(fabs(p[1]) / AU) + 1) * SCALE * -1;
   }
 }
 
-
 void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
    // Fill syms/names of planets, positions, and convert to ints
-   // Only have data for sun, mer, venus, earth
    for ( int i = SUN; i < PLU + 1; i++ ) {
        plnts[i].sym = plnt_sym[i];
        strcpy(plnts[i].name, plnt_names[i]);
@@ -91,7 +77,7 @@ void fill_plnts (struct Planets plnts[], const SpiceDouble* et) {
    } 
 }
 
-// Get time (UTC)
+// Get time (UTC) and convert it into a string so we can send to SPICE
 void get_time ( char* mytime ) {
   time_t timet;
   struct tm * s_t;
@@ -103,20 +89,17 @@ void get_time ( char* mytime ) {
 } 
 
 int main ( int argc, char** argv ){
-  // ephemiris-based time
   SpiceDouble et, dist; 
   char frmt_time[30];
   struct Planets p[10];
-  // Get the current time in specific format (UTC)
   get_time(frmt_time);
   printf("Time (UTC): %s\n", frmt_time);
   printf("Loading Kernels...\n");
-  // Load the necessary kernels
+  // Load the necessary kernels in order to grab planet data
   furnsh_c( "metakernel.tm" );
   str2et_c(frmt_time, &et);
   fill_plnts(p, &et);
-  // Testing out integer forms if each space char is 1 AU
-  printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", p[3].xpos, p[3].ypos);
+  // printf("SUN -> EAR (AU) (X, Y) Coord: (%d, %d)\n", p[3].xpos, p[3].ypos);
   draw(p);
   return 0;
 }
