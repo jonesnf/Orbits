@@ -3,6 +3,7 @@ Program to get current orbits of all planets (and Pluto) using NASA's SPICE tool
 
 ### Current output
 This is what it currently looks like when you run the 'orbits' command
+#### NOTE: Planets from Mars on are plotted logarithmically 
 * S - Sun
 * M - Mercury
 * V - Venus
